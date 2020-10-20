@@ -7,7 +7,7 @@ class Fb::Jwt::Auth::ServiceTokenService
 
   def initialize(key)
     @key = key
-    @root_url = params[:root_url] || ENV['SERVICE_TOKEN_CACHE_ROOT_URL']
+    @root_url = Fb::Jwt::Auth.service_token_cache_root_url
   end
 
   def public_key
