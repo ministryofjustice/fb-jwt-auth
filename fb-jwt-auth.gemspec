@@ -3,20 +3,20 @@ require_relative 'lib/fb/jwt/auth/version'
 Gem::Specification.new do |spec|
   spec.name          = "fb-jwt-auth"
   spec.version       = Fb::Jwt::Auth::VERSION
-  spec.authors       = ["matttei"]
-  spec.email         = ["matt.tei@digital.justice.gov.uk"]
+  spec.authors       = ['Form builder developers']
+  spec.email         = ['form-builder-team@digital.justice.gov.uk']
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{JWT authentication done in form builder team}
+  spec.description   = %q{JWT authentication done in all apps in form builder}
+  spec.homepage      = 'https://github.com/ministryofjustice/fb-jwt-auth'
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
   spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-  spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  spec.metadata["source_code_uri"] = "https://github.com/ministryofjustice/fb-jwt-auth"
+  spec.metadata["changelog_uri"] = "https://github.com/ministryofjustice/fb-jwt-auth/blob/main/Changelog.md"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
