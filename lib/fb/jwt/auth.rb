@@ -18,7 +18,7 @@ module Fb
         yield self
       end
 
-      autoload :ServiceTokenService, 'fb/jwt/auth/service_token_service'
+      autoload :ServiceTokenClient, 'fb/jwt/auth/service_token_client'
 
       class TokenNotPresentError < StandardError
       end
@@ -72,7 +72,7 @@ module Fb
       end
 
       def public_key
-        OpenSSL::PKey::RSA.new(ServiceTokenService.new(key).public_key)
+        OpenSSL::PKey::RSA.new(ServiceTokenClient.new(key).public_key)
       end
     end
   end

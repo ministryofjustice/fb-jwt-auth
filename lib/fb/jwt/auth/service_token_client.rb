@@ -2,7 +2,7 @@ require 'net/http'
 require 'json'
 require 'base64'
 
-class Fb::Jwt::Auth::ServiceTokenService
+class Fb::Jwt::Auth::ServiceTokenClient
   attr_accessor :key, :root_url
 
   def initialize(key)
