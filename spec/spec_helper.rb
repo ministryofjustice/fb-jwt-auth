@@ -1,5 +1,8 @@
 require "bundler/setup"
 require "fb/jwt/auth"
+require 'logger'
+
+Time.zone = 'London'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

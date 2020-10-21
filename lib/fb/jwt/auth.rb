@@ -1,9 +1,23 @@
 require 'fb/jwt/auth/version'
 require 'openssl'
+require 'jwt'
+require 'active_support/core_ext'
 
 module Fb
   module Jwt
     class Auth
+      def self.service_token_cache_root_url=(value)
+        @@service_token_cache_root_url = value
+      end
+
+      def self.service_token_cache_root_url
+        @@service_token_cache_root_url
+      end
+
+      def self.configure(&block)
+        yield self
+      end
+
       autoload :ServiceTokenService, 'fb/jwt/auth/service_token_service'
 
       class TokenNotPresentError < StandardError
@@ -24,7 +38,7 @@ module Fb
         @logger = logger
       end
 
-      def verify_token!
+      def verify!
         begin
           hmac_secret = public_key(key)
           payload, _header = JWT.decode(
@@ -46,6 +60,7 @@ module Fb
           end
 
           logger.debug 'token is valid'
+          payload
         rescue StandardError => e
           logger.debug("Couldn't parse that token - error #{e}")
           raise TokenNotValidError

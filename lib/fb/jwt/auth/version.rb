@@ -1,6 +1,6 @@
 module Fb
   module Jwt
-    module Auth
+    class Auth
       VERSION = "0.1.0"
     end
   end

@@ -13,6 +13,8 @@ class Fb::Jwt::Auth::ServiceTokenService
   def public_key
     response = Net::HTTP.get_response(public_key_uri)
 
+    # improve when service token cache returns error response (timeout, 400,
+    # 500)
     return unless response.code.to_i == 200
 
     Base64.strict_decode64(JSON.parse(response.body).fetch('token'))
