@@ -19,12 +19,44 @@ jobs:
           only_for_branches: main
           failure_message: ":facepalm:  Failed job $CIRCLE_JOB  :homer-disappear:"
           include_job_number_field: false
+  publish:
+    docker:
+      - image: cimg/ruby:2.7.2
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: bundle install
+      - run:
+          name: Setup Rubygems
+          command: |
+            mkdir ~/.gem
+            echo -e "---\r\n:rubygems_api_key: $RUBYGEMS_API_KEY" > ~/.gem/credentials
+            chmod 0600 /home/circleci/.gem/credentials
+      - run:
+          name: Publish to Rubygems
+          command: |
+            set -e
+
+            VERSION=$(ruby -e "require './lib/fb/jwt/auth/version.rb'; puts Fb::Jwt::Auth::VERSION")
+            PUBLISHED_VERSION=$(curl https://rubygems.org/api/v1/versions/fb-jwt-auth/latest.json | sed -e 's/[{}]/''/g' | sed s/\"//g | awk -v RS=',' -F: '$1=="version"{print $2}')
+
+            if [ "$VERSION" != "$PUBLISHED_VERSION" ]
+            then
+              bundle exec rake release
+              curl -X POST -H 'Content-type: application/json' --data "{\"text\":\":woohoo:  Successfully published ${CIRCLE_PROJECT_REPONAME} ${VERSION}  :ship_it_parrot:\"}" "$SLACK_WEBHOOK"
+            fi
       - slack/status: *slack_status
 
 workflows:
   commit-workflow:
     jobs:
-      - test:
+      - test
+      - publish:
+          requires:
+            - test
           filters:
+            tags:
+              only: /.*/
             branches:
               only: main
