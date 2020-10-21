@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.name          = "fb-jwt-auth"
   spec.version       = Fb::Jwt::Auth::VERSION
   spec.authors       = ['Form builder developers']
-  spec.email         = ['form-builder-team@digital.justice.gov.uk']
+  spec.email         = ['form-builder-developers@digital.justice.gov.uk']
 
   spec.summary       = %q{JWT authentication done in form builder team}
   spec.description   = %q{JWT authentication done in all apps in form builder}
