@@ -3,6 +3,8 @@ require 'json'
 require 'base64'
 
 class Fb::Jwt::Auth::ServiceTokenClient
+  class ServiceTokenCacheError < StandardError; end
+
   attr_accessor :key, :root_url
 
   def initialize(key)
@@ -13,11 +15,18 @@ class Fb::Jwt::Auth::ServiceTokenClient
   def public_key
     response = Net::HTTP.get_response(public_key_uri)
 
-    # improve when service token cache returns error response (timeout, 400,
-    # 500)
-    return unless response.code.to_i == 200
+    unless response.code.to_i == 200
+      raise ServiceTokenCacheError.new(
+        "Unexpected response code\n" \
+        "Response code: #{response.code} => Response body: #{response.body}"
+      )
+    end
 
     Base64.strict_decode64(JSON.parse(response.body).fetch('token'))
+  rescue Errno::ECONNREFUSED => e
+    raise ServiceTokenCacheError.new(
+      "Unable to connect to the Service Token Cache\n#{e.message}"
+    )
   end
 
   private
