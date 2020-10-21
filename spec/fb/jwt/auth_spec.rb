@@ -35,5 +35,20 @@ RSpec.describe Fb::Jwt::Auth do
         })
       end
     end
+
+    context 'when invalid token' do
+      context 'when token is not present' do
+        it 'should raise a TokenNotPresentError error' do
+          auth = described_class.new(
+            token: nil,
+            key: 'some-key',
+            leeway: 60,
+            logger: logger
+          )
+
+          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotPresentError)
+        end
+      end
+    end
   end
 end

@@ -39,6 +39,8 @@ module Fb
       end
 
       def verify!
+        raise TokenNotPresentError if token.nil?
+
         begin
           hmac_secret = public_key(key)
           payload, _header = JWT.decode(
