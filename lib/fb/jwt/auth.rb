@@ -51,8 +51,9 @@ module Fb
             algorithm: 'RS256'
           )
         rescue StandardError => e
-          logger.debug("Couldn't parse that token - error #{e}")
-          raise TokenNotValidError
+          error_message = "Couldn't parse that token - error #{e}"
+          logger.debug(error_message)
+          raise TokenNotValidError.new(error_message)
         end
 
         # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
@@ -60,9 +61,10 @@ module Fb
         iat_skew = payload['iat'].to_i - Time.zone.now.to_i
 
         if iat_skew.abs > leeway.to_i
-          logger.debug("iat skew is #{iat_skew}, max is #{leeway} - INVALID")
+          error_message = "iat skew is #{iat_skew}, max is #{leeway} - INVALID"
+          logger.debug(error_message)
 
-          raise TokenExpiredError
+          raise TokenExpiredError.new(error_message)
         end
 
         logger.debug 'token is valid'
