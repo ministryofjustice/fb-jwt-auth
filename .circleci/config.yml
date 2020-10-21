@@ -1,0 +1,30 @@
+version: 2.1
+orbs:
+  slack: circleci/slack@3.4.2
+
+jobs:
+  test:
+    docker:
+      - image: cimg/ruby:2.7.2
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: bundle install
+      - run:
+          name: Test
+          command: bundle exec rspec
+      - slack/status: &slack_status
+          fail_only: true
+          only_for_branches: main
+          failure_message: ":facepalm:  Failed job $CIRCLE_JOB  :homer-disappear:"
+          include_job_number_field: false
+      - slack/status: *slack_status
+
+workflows:
+  commit-workflow:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: main
