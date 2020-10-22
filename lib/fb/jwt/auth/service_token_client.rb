@@ -5,11 +5,12 @@ require 'base64'
 class Fb::Jwt::Auth::ServiceTokenClient
   class ServiceTokenCacheError < StandardError; end
 
-  attr_accessor :key, :root_url
+  attr_accessor :key, :root_url, :auth_version
 
   def initialize(key)
     @key = key
     @root_url = Fb::Jwt::Auth.service_token_cache_root_url
+    @auth_version = Fb::Jwt::Auth.service_token_cache_auth_version || :v2
   end
 
   def public_key
@@ -32,6 +33,6 @@ class Fb::Jwt::Auth::ServiceTokenClient
   private
 
   def public_key_uri
-    URI.join(@root_url, '/service/v2/', key)
+    URI.join(@root_url, "/service/#{auth_version}/", key)
   end
 end
