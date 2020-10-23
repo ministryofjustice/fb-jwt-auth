@@ -62,7 +62,7 @@ RSpec.describe Fb::Jwt::Auth do
         end
 
         it 'should raise a IssuerNotPresentError' do
-          expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::IssuerNotPresentError)
+          expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::IssuerNotPresentError, 'Issuer is not present in the token')
         end
       end
 
@@ -72,7 +72,7 @@ RSpec.describe Fb::Jwt::Auth do
         end
 
         it 'should raise a NamespaceNotPresentError' do
-          expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::NamespaceNotPresentError)
+          expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::NamespaceNotPresentError, 'Namespace is not present in the token')
         end
       end
     end
@@ -98,7 +98,7 @@ RSpec.describe Fb::Jwt::Auth do
         let(:token) { nil }
 
         it 'should raise a TokenNotPresentError error' do
-          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotPresentError)
+          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotPresentError, 'Token is not present')
         end
       end
 
@@ -110,7 +110,7 @@ RSpec.describe Fb::Jwt::Auth do
             Fb::Jwt::Auth::ServiceTokenClient
           ).to receive(:new).with(application: key).and_return(service_token_client)
 
-          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenExpiredError)
+          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenExpiredError, /Token has expired/)
         end
       end
 
@@ -130,7 +130,7 @@ RSpec.describe Fb::Jwt::Auth do
             Fb::Jwt::Auth::ServiceTokenClient
           ).to receive(:new).with(application: key).and_return(service_token_client)
 
-          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotValidError)
+          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotValidError, /Token is not valid/)
         end
       end
     end
