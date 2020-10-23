@@ -34,7 +34,7 @@ You can configure the version:
 
 ```ruby
 Fb::Jwt::Auth.configure do |config|
-  config.service_token_cache_auth_version = :v3
+  config.service_token_cache_api_version = :v3
 end
 ```
 

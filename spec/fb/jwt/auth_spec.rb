@@ -28,6 +28,9 @@ RSpec.describe Fb::Jwt::Auth do
     end
 
     context 'v3 with issuer in the JWT payload' do
+      let(:payload) do
+        { iat: iat, sub: 'luke', iss: 'greedo', namespace: 'fb-awesome' }
+      end
       let(:v3_auth) do
         described_class.new(
           token: token,
@@ -40,12 +43,15 @@ RSpec.describe Fb::Jwt::Auth do
         it 'returns the correct payload' do
           allow(
             Fb::Jwt::Auth::ServiceTokenClient
-          ).to receive(:new).with('greedo').and_return(service_token_client)
+          ).to receive(:new).with(
+            application: 'greedo',
+            namespace: 'fb-awesome'
+          ).and_return(service_token_client)
 
           result = v3_auth.verify!
 
           expect(result).to eq({
-            'iss' => 'greedo', 'iat'=> iat, 'sub' => 'luke'
+            'iss' => 'greedo', 'iat'=> iat, 'sub' => 'luke', 'namespace' => 'fb-awesome'
           })
         end
       end
@@ -59,6 +65,16 @@ RSpec.describe Fb::Jwt::Auth do
           expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::IssuerNotPresentError)
         end
       end
+
+      context 'when namespace is not in the v3 JWT payload' do
+        let(:payload) do
+          { iat: iat, sub: 'luke', iss: 'baby_yoda' }
+        end
+
+        it 'should raise a NamespaceNotPresentError' do
+          expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::NamespaceNotPresentError)
+        end
+      end
     end
 
     context 'v2 with key as passed in separately' do
@@ -66,7 +82,7 @@ RSpec.describe Fb::Jwt::Auth do
         it 'returns payload' do
           allow(
             Fb::Jwt::Auth::ServiceTokenClient
-          ).to receive(:new).with(key).and_return(service_token_client)
+          ).to receive(:new).with(application: key).and_return(service_token_client)
 
           result = auth.verify!
 
@@ -92,7 +108,7 @@ RSpec.describe Fb::Jwt::Auth do
         it 'should raise TokenExpiredError' do
           allow(
             Fb::Jwt::Auth::ServiceTokenClient
-          ).to receive(:new).with(key).and_return(service_token_client)
+          ).to receive(:new).with(application: key).and_return(service_token_client)
 
           expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenExpiredError)
         end
@@ -112,7 +128,7 @@ RSpec.describe Fb::Jwt::Auth do
         it 'should raise a TokenNotValidError error' do
           allow(
             Fb::Jwt::Auth::ServiceTokenClient
-          ).to receive(:new).with(key).and_return(service_token_client)
+          ).to receive(:new).with(application: key).and_return(service_token_client)
 
           expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotValidError)
         end

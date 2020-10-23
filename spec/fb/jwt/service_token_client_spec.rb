@@ -5,7 +5,9 @@ RSpec.describe Fb::Jwt::Auth::ServiceTokenClient do
     end
   end
 
-  let(:service_token_client) { described_class.new('some-key') }
+  let(:service_token_client) do
+    described_class.new(application: 'some-key')
+  end
   let(:public_key_uri) { URI('http://localhost:4000/service/v2/some-key') }
 
   context 'when public key exists' do
@@ -50,19 +52,22 @@ RSpec.describe Fb::Jwt::Auth::ServiceTokenClient do
   end
 
   context 'when requesting v3' do
+    let(:service_token_client) do
+      described_class.new(application: 'some-key', namespace: 'some-namespace')
+    end
     before do
       Fb::Jwt::Auth.configure do |config|
-        config.service_token_cache_auth_version = :v3
+        config.service_token_cache_api_version = :v3
       end
     end
 
     after do
       Fb::Jwt::Auth.configure do |config|
-        config.service_token_cache_auth_version = nil
+        config.service_token_cache_api_version = nil
       end
     end
 
-    let(:public_key_uri) { URI('http://localhost:4000/service/v3/some-key') }
+    let(:public_key_uri) { URI('http://localhost:4000/v3/applications/some-key/namespaces/some-namespace') }
 
     let(:response) do
       double(code: 200, body: JSON.generate(token: Base64.strict_encode64('R2D2')))

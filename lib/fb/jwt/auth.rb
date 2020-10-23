@@ -6,7 +6,7 @@ require 'active_support/core_ext'
 module Fb
   module Jwt
     class Auth
-      cattr_accessor :service_token_cache_root_url, :service_token_cache_auth_version
+      cattr_accessor :service_token_cache_root_url, :service_token_cache_api_version
 
       def self.configure(&block)
         yield self
@@ -26,6 +26,9 @@ module Fb
       class IssuerNotPresentError < StandardError
       end
 
+      class NamespaceNotPresentError < StandardError
+      end
+
       attr_accessor :token, :key, :leeway, :logger
 
       def initialize(token:, key: nil, leeway:, logger:)
@@ -38,9 +41,10 @@ module Fb
       def verify!
         raise TokenNotPresentError if token.nil?
 
-        iss = issuer
+        application_details = find_application_info
+
         begin
-          hmac_secret = public_key(iss)
+          hmac_secret = public_key(application_details)
           payload, _header = decode(hmac_secret: hmac_secret)
         rescue StandardError => e
           error_message = "Couldn't parse that token - error #{e}"
@@ -73,18 +77,23 @@ module Fb
         )
       end
 
-      def issuer
-        return key if key
+      def find_application_info
+        return { application: key } if key
 
         payload, _header = decode(verify: false)
-        iss = payload['iss']
-        raise IssuerNotPresentError unless iss
+        application = payload['iss']
+        namespace = payload['namespace']
 
-        iss
+        raise IssuerNotPresentError unless application
+        raise NamespaceNotPresentError unless namespace
+
+        { application: application, namespace: namespace}
       end
 
-      def public_key(iss)
-        OpenSSL::PKey::RSA.new(ServiceTokenClient.new(iss).public_key)
+      def public_key(attributes)
+        OpenSSL::PKey::RSA.new(
+          ServiceTokenClient.new(attributes).public_key
+        )
       end
     end
   end
