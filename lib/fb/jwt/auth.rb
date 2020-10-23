@@ -23,9 +23,12 @@ module Fb
       class TokenExpiredError < StandardError
       end
 
+      class IssuerNotPresentError < StandardError
+      end
+
       attr_accessor :token, :key, :leeway, :logger
 
-      def initialize(token:, key:, leeway:, logger:)
+      def initialize(token:, key: nil, leeway:, logger:)
         @token = token
         @key = key
         @leeway = leeway
@@ -35,15 +38,10 @@ module Fb
       def verify!
         raise TokenNotPresentError if token.nil?
 
+        iss = issuer
         begin
-          hmac_secret = public_key(key)
-          payload, _header = JWT.decode(
-            token,
-            hmac_secret,
-            true,
-            exp_leeway: leeway,
-            algorithm: 'RS256'
-          )
+          hmac_secret = public_key(iss)
+          payload, _header = decode(hmac_secret: hmac_secret)
         rescue StandardError => e
           error_message = "Couldn't parse that token - error #{e}"
           logger.debug(error_message)
@@ -65,8 +63,28 @@ module Fb
         payload
       end
 
-      def public_key
-        OpenSSL::PKey::RSA.new(ServiceTokenClient.new(key).public_key)
+      def decode(verify: true, hmac_secret: nil)
+        JWT.decode(
+          token,
+          hmac_secret,
+          verify,
+          exp_leeway: leeway,
+          algorithm: 'RS256'
+        )
+      end
+
+      def issuer
+        return key if key
+
+        payload, _header = decode(verify: false)
+        iss = payload['iss']
+        raise IssuerNotPresentError unless iss
+
+        iss
+      end
+
+      def public_key(iss)
+        OpenSSL::PKey::RSA.new(ServiceTokenClient.new(iss).public_key)
       end
     end
   end

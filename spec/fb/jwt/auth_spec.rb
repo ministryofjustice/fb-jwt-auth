@@ -5,11 +5,11 @@ RSpec.describe Fb::Jwt::Auth do
     let(:editor_client_private_key) do
       OpenSSL::PKey::RSA.generate 2048
     end
-    let(:editor_client_public_key) do
+    let(:client_public_key) do
       editor_client_private_key.public_key
     end
     let(:payload) do
-      { iat: iat, sub: 'luke', characters: [:greedo, :jabba, :han_solo] }
+      { iat: iat, sub: 'luke', iss: 'greedo' }
     end
     let(:token) do
       JWT.encode payload, editor_client_private_key, 'RS256'
@@ -23,16 +23,57 @@ RSpec.describe Fb::Jwt::Auth do
         logger: logger
       )
     end
+    let(:service_token_client) do
+      double(public_key: client_public_key)
+    end
 
-    context 'when valid token' do
-      it 'returns payload' do
-        allow(auth).to receive(:public_key).with(key).and_return(editor_client_public_key)
+    context 'v3 with issuer in the JWT payload' do
+      let(:v3_auth) do
+        described_class.new(
+          token: token,
+          leeway: 60,
+          logger: logger
+        )
+      end
 
-        result = auth.verify!
+      context 'with valid token' do
+        it 'returns the correct payload' do
+          allow(
+            Fb::Jwt::Auth::ServiceTokenClient
+          ).to receive(:new).with('greedo').and_return(service_token_client)
 
-        expect(result).to eq({
-          'characters' => ['greedo', 'jabba', 'han_solo'], 'iat'=> iat, 'sub' => 'luke'
-        })
+          result = v3_auth.verify!
+
+          expect(result).to eq({
+            'iss' => 'greedo', 'iat'=> iat, 'sub' => 'luke'
+          })
+        end
+      end
+
+      context 'when issuer is not in the v3 JWT payload' do
+        let(:payload) do
+          { iat: iat, sub: 'luke' }
+        end
+
+        it 'should raise a IssuerNotPresentError' do
+          expect { v3_auth.verify! }.to raise_error(Fb::Jwt::Auth::IssuerNotPresentError)
+        end
+      end
+    end
+
+    context 'v2 with key as passed in separately' do
+      context 'when valid token' do
+        it 'returns payload' do
+          allow(
+            Fb::Jwt::Auth::ServiceTokenClient
+          ).to receive(:new).with(key).and_return(service_token_client)
+
+          result = auth.verify!
+
+          expect(result).to eq({
+            'iss' => 'greedo', 'iat'=> iat, 'sub' => 'luke'
+          })
+        end
       end
     end
 
@@ -49,7 +90,9 @@ RSpec.describe Fb::Jwt::Auth do
         let(:iat) { (Time.now - 61).to_i }
 
         it 'should raise TokenExpiredError' do
-          allow(auth).to receive(:public_key).with(key).and_return(editor_client_public_key)
+          allow(
+            Fb::Jwt::Auth::ServiceTokenClient
+          ).to receive(:new).with(key).and_return(service_token_client)
 
           expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenExpiredError)
         end
@@ -62,9 +105,14 @@ RSpec.describe Fb::Jwt::Auth do
         let(:fake_client_public_key) do
           fake_client_private_key.public_key
         end
+        let(:service_token_client) do
+          double(public_key: fake_client_public_key)
+        end
 
         it 'should raise a TokenNotValidError error' do
-          allow(auth).to receive(:public_key).with(key).and_return(fake_client_public_key)
+          allow(
+            Fb::Jwt::Auth::ServiceTokenClient
+          ).to receive(:new).with(key).and_return(service_token_client)
 
           expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotValidError)
         end
