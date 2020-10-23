@@ -1,3 +1,6 @@
+# v0.2.1
+* Add better error messages
+
 # v0.2.0
 
 * Add service token cache v3 implementation

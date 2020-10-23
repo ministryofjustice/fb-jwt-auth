@@ -39,7 +39,7 @@ module Fb
       end
 
       def verify!
-        raise TokenNotPresentError if token.nil?
+        raise TokenNotPresentError.new('Token is not present') if token.nil?
 
         application_details = find_application_info
 
@@ -47,7 +47,7 @@ module Fb
           hmac_secret = public_key(application_details)
           payload, _header = decode(hmac_secret: hmac_secret)
         rescue StandardError => e
-          error_message = "Couldn't parse that token - error #{e}"
+          error_message = "Token is not valid: error #{e}"
           logger.debug(error_message)
           raise TokenNotValidError.new(error_message)
         end
@@ -57,7 +57,7 @@ module Fb
         iat_skew = payload['iat'].to_i - Time.zone.now.to_i
 
         if iat_skew.abs > leeway.to_i
-          error_message = "iat skew is #{iat_skew}, max is #{leeway} - INVALID"
+          error_message = "Token has expired: iat skew is #{iat_skew}, max is #{leeway}"
           logger.debug(error_message)
 
           raise TokenExpiredError.new(error_message)
@@ -84,8 +84,8 @@ module Fb
         application = payload['iss']
         namespace = payload['namespace']
 
-        raise IssuerNotPresentError unless application
-        raise NamespaceNotPresentError unless namespace
+        raise IssuerNotPresentError.new('Issuer is not present in the token') unless application
+        raise NamespaceNotPresentError.new('Namespace is not present in the token') unless namespace
 
         { application: application, namespace: namespace}
       end
