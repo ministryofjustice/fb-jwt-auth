@@ -95,10 +95,20 @@ RSpec.describe Fb::Jwt::Auth do
 
     context 'when invalid token' do
       context 'when token is not present' do
-        let(:token) { nil }
+        context 'when token is nil' do
+          let(:token) { nil }
 
-        it 'should raise a TokenNotPresentError error' do
-          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotPresentError, 'Token is not present')
+          it 'should raise a TokenNotPresentError error' do
+            expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotPresentError, 'Token is not present')
+          end
+        end
+
+        context 'when token is an empty string' do
+          let(:token) { '' }
+
+          it 'should raise a TokenNotPresentError error' do
+            expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotPresentError)
+          end
         end
       end
 

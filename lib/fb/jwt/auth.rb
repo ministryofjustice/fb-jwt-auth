@@ -39,7 +39,7 @@ module Fb
       end
 
       def verify!
-        raise TokenNotPresentError.new('Token is not present') if token.nil?
+        raise TokenNotPresentError.new('Token is not present') if token.blank?
 
         application_details = find_application_info
 
