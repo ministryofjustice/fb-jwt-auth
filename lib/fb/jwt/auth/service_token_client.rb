@@ -12,9 +12,10 @@ class Fb::Jwt::Auth::ServiceTokenClient
 
   attr_accessor :application, :namespace, :root_url, :api_version
 
-  def initialize(application:, namespace: nil)
+  def initialize(application:, namespace: nil, ignore_cache: false)
     @application = application
     @namespace = namespace
+    @ignore_cache = ignore_cache
     @root_url = Fb::Jwt::Auth.service_token_cache_root_url
     @api_version = Fb::Jwt::Auth.service_token_cache_api_version || :v2
   end
@@ -38,8 +39,14 @@ class Fb::Jwt::Auth::ServiceTokenClient
 
   private
 
+  attr_reader :ignore_cache
+
   def public_key_uri
-    URI.join(root_url, version_url)
+    URI.join(root_url, "#{version_url}#{query_param}")
+  end
+
+  def query_param
+    ignore_cache ? '?ignore_cache=true' : ''
   end
 
   def version_url

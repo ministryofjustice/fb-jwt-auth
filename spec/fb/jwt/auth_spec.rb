@@ -124,23 +124,29 @@ RSpec.describe Fb::Jwt::Auth do
         end
       end
 
-      context 'when token raises TokenNotValidError error' do
-        let(:fake_client_private_key) do
-          OpenSSL::PKey::RSA.generate 2048
-        end
-        let(:fake_client_public_key) do
-          fake_client_private_key.public_key
-        end
-        let(:service_token_client) do
-          double(public_key: fake_client_public_key)
-        end
+      context 'when token raises JWT::VerificationError error' do
+        context 'when the cached version of the public key fails validation' do
+          let(:fake_client_private_key) do
+            OpenSSL::PKey::RSA.generate 2048
+          end
+          let(:fake_client_public_key) do
+            fake_client_private_key.public_key
+          end
+          let(:service_token_client) do
+            double(public_key: fake_client_public_key)
+          end
 
-        it 'should raise a TokenNotValidError error' do
-          allow(
-            Fb::Jwt::Auth::ServiceTokenClient
-          ).to receive(:new).with(application: key).and_return(service_token_client)
+          it 'should request again and raise a TokenNotValidError error if second validation fails' do
+            allow(
+              Fb::Jwt::Auth::ServiceTokenClient
+            ).to receive(:new).with(application: key).and_return(service_token_client)
+            allow(
+              Fb::Jwt::Auth::ServiceTokenClient
+            ).to receive(:new).with(application: key, ignore_cache: true).and_return(service_token_client)
 
-          expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotValidError, /Token is not valid/)
+            expect(service_token_client).to receive(:public_key).twice
+            expect { auth.verify! }.to raise_error(Fb::Jwt::Auth::TokenNotValidError, /Token is not valid/)
+          end
         end
       end
     end
