@@ -1,3 +1,9 @@
+# 0.3.0
+* Request non cached version of public key if first validition fails
+
+# v0.2.2
+* Add token not present exception when token is empty
+
 # v0.2.1
 * Add better error messages
 
