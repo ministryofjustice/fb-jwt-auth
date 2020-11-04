@@ -44,8 +44,7 @@ module Fb
         application_details = find_application_info
 
         begin
-          hmac_secret = public_key(application_details)
-          payload, _header = decode(hmac_secret: hmac_secret)
+          payload, _header = retrieve_and_decode_public_key(application_details)
         rescue StandardError => e
           error_message = "Token is not valid: error #{e}"
           logger.debug(error_message)
@@ -65,6 +64,15 @@ module Fb
 
         logger.debug 'token is valid'
         payload
+      end
+
+      def retrieve_and_decode_public_key(application_details)
+        hmac_secret = public_key(application_details)
+        decode(hmac_secret: hmac_secret)
+      rescue JWT::VerificationError
+        logger.debug('First validation failed. Requesting non cached public key')
+        hmac_secret = public_key(application_details.merge(ignore_cache: true))
+        decode(hmac_secret: hmac_secret)
       end
 
       def decode(verify: true, hmac_secret: nil)
