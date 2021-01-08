@@ -6,13 +6,18 @@ require 'active_support/all'
 module Fb
   module Jwt
     class Auth
-      cattr_accessor :service_token_cache_root_url, :service_token_cache_api_version
+      cattr_accessor :service_token_cache_root_url,
+                     :service_token_cache_api_version,
+                     :encoded_private_key,
+                     :issuer,
+                     :namespace
 
       def self.configure(&block)
         yield self
       end
 
       autoload :ServiceTokenClient, 'fb/jwt/auth/service_token_client'
+      autoload :ServiceAccessToken, 'fb/jwt/auth/service_access_token'
 
       class TokenNotPresentError < StandardError
       end
