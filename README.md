@@ -25,6 +25,16 @@ Fb::Jwt::Auth.configure do |config|
   config.service_token_cache_root_url = ENV['SERVICE_TOKEN_CACHE_ROOT_URL']
 end
 ```
+In order to generate the service access token we need to use `Fb::Jwt::Auth::ServiceAccessToken.new.generate` or if you require a subject, `Fb::Jwt::Auth::ServiceAccessToken.new(subject: subject).generate`
+
+In the case you need to configure the service access token as a client
+```ruby
+Fb::Jwt::Auth.configure do |config|
+  config.issuer = 'fb-editor'
+  config.namespace = 'formbuilder-saas-test'
+  config.encoded_private_key = 'base64 encoded private key'
+end
+```
 
 ### Using other endpoint versions
 
