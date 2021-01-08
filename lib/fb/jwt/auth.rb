@@ -1,7 +1,7 @@
 require 'fb/jwt/auth/version'
 require 'openssl'
 require 'jwt'
-require 'active_support/core_ext'
+require 'active_support/all'
 
 module Fb
   module Jwt
