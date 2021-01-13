@@ -1,3 +1,9 @@
+# 0.5.0
+* Do not base64 decode private key
+
+# 0.4.0
+* Generate the access token
+
 # 0.3.0
 * Request non cached version of public key if first validition fails
 

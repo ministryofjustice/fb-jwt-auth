@@ -1,8 +1,6 @@
 RSpec.describe Fb::Jwt::Auth::ServiceAccessToken do
   let(:private_key) { OpenSSL::PKey::RSA.generate(2048) }
-  let(:encoded_private_key) do
-    Base64.strict_encode64(private_key.to_s)
-  end
+  let(:encoded_private_key) { private_key.to_pem }
   let(:public_key) { private_key.public_key }
   let(:current_time) { Time.new(2020, 12, 7, 16) }
 
