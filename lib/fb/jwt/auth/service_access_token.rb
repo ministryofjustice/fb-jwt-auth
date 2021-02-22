@@ -7,11 +7,11 @@ module Fb
                     :subject,
                     :namespace
 
-        def initialize(subject: nil)
+        def initialize(subject: nil, issuer: nil)
           @subject = subject
           @encoded_private_key = Fb::Jwt::Auth.encoded_private_key
           @namespace = Fb::Jwt::Auth.namespace
-          @issuer = Fb::Jwt::Auth.issuer
+          @issuer = issuer || Fb::Jwt::Auth.issuer
         end
 
         def generate

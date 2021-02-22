@@ -1,3 +1,6 @@
+# 0.6.0
+* Supplier issuer to service token client
+
 # 0.5.0
 * Do not base64 decode private key
 
