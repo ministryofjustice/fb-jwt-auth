@@ -7,15 +7,17 @@ RSpec.describe Fb::Jwt::Auth::ServiceAccessToken do
   describe '#generate' do
     let(:subject) { nil }
     let(:namespace) { nil }
-    let(:issuer) { 'fb-editor' }
+    let(:issuer) { nil }
+    let(:default_issuer) { 'fb-editor' }
     let(:service_token) do
       described_class.new(
-        subject: subject
+        subject: subject,
+        issuer: issuer
       )
     end
 
     before do
-      allow(Fb::Jwt::Auth).to receive(:issuer).and_return(issuer)
+      allow(Fb::Jwt::Auth).to receive(:issuer).and_return(default_issuer)
       allow(Fb::Jwt::Auth).to receive(:namespace).and_return(namespace)
       allow(Fb::Jwt::Auth).to receive(:encoded_private_key).and_return(
         encoded_private_key
@@ -81,6 +83,24 @@ RSpec.describe Fb::Jwt::Auth::ServiceAccessToken do
             'iat' => current_time.to_i,
             'iss' => 'fb-editor',
             'namespace' => 'formbuilder-saas-test'
+          },
+          {
+            'alg' => 'RS256'
+          }
+        ])
+      end
+    end
+
+    context 'when an issuer is passed in' do
+      let(:issuer) { 'some-awesome-form' }
+
+      it 'generates a jwt access token with the supplied issuer' do
+        expect(
+          JWT.decode(service_token.generate, public_key, true, { algorithm: 'RS256' })
+        ).to eq([
+          {
+            'iat' => current_time.to_i,
+            'iss' => issuer
           },
           {
             'alg' => 'RS256'
