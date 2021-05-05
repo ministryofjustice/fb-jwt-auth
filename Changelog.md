@@ -1,3 +1,6 @@
+# 0.7.0
+* Use Ruby 2.7.3
+
 # 0.6.0
 * Supplier issuer to service token client
 
