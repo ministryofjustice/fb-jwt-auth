@@ -52,8 +52,11 @@ jobs:
 workflows:
   commit-workflow:
     jobs:
-      - test
+      - test:
+          context: &moj-forms-context
+            - moj-forms
       - publish:
+          context: *moj-forms-context
           requires:
             - test
           filters:
