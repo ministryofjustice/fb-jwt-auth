@@ -6,3 +6,5 @@ gemspec
 gem "rake"
 gem "rspec"
 gem 'byebug'
+gem 'simplecov'
+gem 'simplecov-console'
