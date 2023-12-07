@@ -18,8 +18,8 @@ RSpec.configure do |config|
   end
 end
 
-SimpleCov.start 'rails' do
-  add_filter %w[ bin coverage]
+SimpleCov.start  do
+  add_filter %w[ bin coverage spec]
   enable_coverage(:branch)
   enable_coverage_for_eval
 end
