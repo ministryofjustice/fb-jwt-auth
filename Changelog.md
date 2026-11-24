@@ -1,8 +1,9 @@
 # 0.11.0
-* Use Ruby 4.0.9
+* Use Ruby 4.0.10
 
 # 0.10.0
 * Use Ruby 3.1.3
+
 # 0.9.0
 * Use Ruby 2.7.7
 
